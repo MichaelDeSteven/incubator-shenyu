@@ -64,6 +64,11 @@ public enum RpcTypeEnum {
     MOTAN("motan", true),
 
     /**
+     * brpc.
+     */
+    BRPC("brpc", true),
+
+    /**
      * grpc.
      */
     GRPC("grpc", true);

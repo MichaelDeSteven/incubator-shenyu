@@ -14,7 +14,7 @@
  * See the License for the specific language governing permissions and
  * limitations under the License.
  */
- 
+
 package org.apache.shenyu.common.enums;
 
 import java.util.Arrays;
@@ -26,7 +26,7 @@ import java.util.stream.Collectors;
  * PluginEnum.
  */
 public enum PluginEnum {
-    
+
     /**
      * Mqtt plugin enum.
      */
@@ -36,17 +36,17 @@ public enum PluginEnum {
      * Global plugin enum.
      */
     GLOBAL(5, 0, "global"),
-    
+
     /**
      * the mock plugin enum.
      */
     MOCK(8, 0, "mock"),
-    
+
     /**
      * the cache plugin enum.
      */
     CACHE(10, 0, "cache"),
-    
+
     /**
      * Monitor plugin enum.
      */
@@ -106,7 +106,7 @@ public enum PluginEnum {
      * Request plugin enum.
      */
     REQUEST(120, 0, "request"),
-    
+
     /**
      * GeneralContext plugin enum.
      */
@@ -131,7 +131,7 @@ public enum PluginEnum {
      * Logging console plugin enum.
      */
     LOGGING_CONSOLE(160, 0, "loggingConsole"),
-    
+
     /**
      * Logging RocketMQ plugin enum.
      */
@@ -151,7 +151,7 @@ public enum PluginEnum {
      * Logging ElasticSearch plugin enum.
      */
     LOGGING_ELASTIC_SEARCH(190, 0, "loggingElasticSearch"),
-    
+
     /**
      * Divide plugin enum.
      */
@@ -211,34 +211,40 @@ public enum PluginEnum {
      * GPRC plugin enum.
      */
     GRPC(310, 0, "grpc"),
-    
+
     /**
      * Motan plugin enum.
      */
     MOTAN(310, 0, "motan"),
 
     /**
+     * Brpc plugin enum.
+     */
+    BRPC(310, 0, "brpc"),
+
+
+    /**
      * Cryptor response plugin enum.
      */
     CRYPTOR_RESPONSE(410, 0, "cryptorResponse"),
-    
+
     /**
      * Response plugin enum.
      */
     RESPONSE(420, 0, "response");
-    
+
     /**
      * When the application starts, the plugin is cached and we can obtained by name.
      * When there are duplicate plugin names, it can be detected and resolved at compile time.
      */
     private static final Map<String, PluginEnum> PLUGIN_ENUM_MAP = Arrays.stream(PluginEnum.values()).collect(Collectors.toMap(plugin -> plugin.name, plugin -> plugin));
-    
+
     private final int code;
-    
+
     private final int role;
-    
+
     private final String name;
-    
+
     /**
      * all args constructor.
      *

@@ -107,6 +107,15 @@ public enum ShenyuResultEnum {
      */
     MOTAN_HAVE_BODY_PARAM(437, "Motan must have body param, please enter the JSON format in the body!"),
 
+    /**
+     * BRPC have body param shenyu result enum.
+     */
+    BRPC_HAVE_BODY_PARAM(438, "Brpc must have body param, please enter the JSON format in the body!"),
+
+    /**
+     * BRPC invoke shenyu result enum.
+     */
+    BRPC_INVOKE(439, "Brpc invoke error!"),
 
     /**
      * full selector type enum.

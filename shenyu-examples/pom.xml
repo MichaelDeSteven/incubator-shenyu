@@ -54,6 +54,7 @@
         <module>shenyu-examples-websocket</module>
         <module>shenyu-examples-springmvc</module>
         <module>shenyu-examples-springmvc-tomcat</module>
+        <module>shenyu-examples-brpc</module>
     </modules>
 
     <build>
