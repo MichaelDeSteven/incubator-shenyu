@@ -15,19 +15,16 @@
  * limitations under the License.
  */
 
-package org.apache.shenyu.client.springcloud.init;
+package org.apache.shenyu.client.brpc;
 
-import org.apache.shenyu.client.core.exception.ShenyuClientIllegalArgumentException;
+import com.baidu.brpc.spring.annotation.RpcExporter;
+import org.apache.shenyu.client.brpc.common.annotation.ShenyuBrpcClient;
 import org.apache.shenyu.client.core.register.ShenyuClientRegisterRepositoryFactory;
-import org.apache.shenyu.client.springcloud.annotation.ShenyuSpringCloudClient;
 import org.apache.shenyu.register.client.http.utils.RegisterUtils;
 import org.apache.shenyu.register.common.config.PropertiesConfig;
 import org.apache.shenyu.register.common.config.ShenyuRegisterCenterConfig;
-import org.junit.Assert;
 import org.junit.jupiter.api.BeforeEach;
-import org.junit.jupiter.api.MethodOrderer;
 import org.junit.jupiter.api.Test;
-import org.junit.jupiter.api.TestMethodOrder;
 import org.junit.jupiter.api.extension.ExtendWith;
 import org.mockito.Mock;
 import org.mockito.MockedStatic;
@@ -35,11 +32,6 @@ import org.mockito.junit.jupiter.MockitoExtension;
 import org.mockito.stubbing.Answer;
 import org.springframework.context.ApplicationContext;
 import org.springframework.context.event.ContextRefreshedEvent;
-import org.springframework.core.env.Environment;
-import org.springframework.web.bind.annotation.PostMapping;
-import org.springframework.web.bind.annotation.RequestBody;
-import org.springframework.web.bind.annotation.RequestMapping;
-import org.springframework.web.bind.annotation.RestController;
 
 import java.util.LinkedHashMap;
 import java.util.Map;
@@ -48,108 +40,77 @@ import java.util.Properties;
 
 import static org.mockito.ArgumentMatchers.any;
 import static org.mockito.Mockito.mockStatic;
-import static org.mockito.Mockito.never;
 import static org.mockito.Mockito.times;
 import static org.mockito.Mockito.verify;
 import static org.mockito.Mockito.when;
 
 /**
- * Test for {@link SpringCloudClientEventListener}.
+ * Test for {@link BrpcClientEventListener}.
  */
 @ExtendWith(MockitoExtension.class)
-@TestMethodOrder(MethodOrderer.Alphanumeric.class)
-public final class SpringCloudClientEventListenerTest {
-
-    @Mock
-    private static Environment env;
-
+public class BrpcClientEventListenerTest {
+    
     private final MockedStatic<RegisterUtils> registerUtilsMockedStatic = mockStatic(RegisterUtils.class);
-
-    private final SpringCloudClientTestBean springCloudClientTestBean = new SpringCloudClientTestBean();
-
+    
+    private final BrpcClientTestBean brpcClientTestBean = new BrpcClientTestBean();
+    
     @Mock
     private ApplicationContext applicationContext;
-
-    private ContextRefreshedEvent contextRefreshedEvent;
-
-    @BeforeEach
-    public void beforeEach() {
-        when(env.getProperty("spring.application.name")).thenReturn("spring-cloud-test");
-    }
     
-    private void init() {
+    private ContextRefreshedEvent contextRefreshedEvent;
+    
+    @BeforeEach
+    public void init() {
         Map<String, Object> results = new LinkedHashMap<>();
-        results.put("springCloudClientTestBean", springCloudClientTestBean);
+        results.put("brpcClientTestBean", brpcClientTestBean);
         when(applicationContext.getBeansWithAnnotation(any())).thenReturn(results);
         contextRefreshedEvent = new ContextRefreshedEvent(applicationContext);
     }
     
     @Test
-    public void testShenyuBeanProcess() {
-        registerUtilsMockedStatic.when(() -> RegisterUtils.doLogin(any(), any(), any())).thenReturn(Optional.of("token"));
-        // config with full
-        SpringCloudClientEventListener springCloudClientEventListener = buildSpringCloudClienttEventListener(true);
-        springCloudClientEventListener.onApplicationEvent(contextRefreshedEvent);
-        verify(applicationContext, never()).getBeansWithAnnotation(any());
-        registerUtilsMockedStatic.close();
-    }
-
-    @Test
     public void testNormalBeanProcess() {
-        init();
         registerUtilsMockedStatic.when(() -> RegisterUtils.doLogin(any(), any(), any())).thenReturn(Optional.of("token"));
-        SpringCloudClientEventListener springCloudClientEventListener = buildSpringCloudClienttEventListener(false);
-        springCloudClientEventListener.onApplicationEvent(contextRefreshedEvent);
+        BrpcClientEventListener springMvcClientEventListener = buildBrpcClientEventListener();
+        springMvcClientEventListener.onApplicationEvent(contextRefreshedEvent);
         verify(applicationContext, times(1)).getBeansWithAnnotation(any());
         registerUtilsMockedStatic.close();
     }
-
+    
     @Test
     public void testWithShenyuClientAnnotation() {
-        init();
         registerUtilsMockedStatic.when(() -> RegisterUtils.doLogin(any(), any(), any())).thenReturn(Optional.of("token"));
         registerUtilsMockedStatic.when(() -> RegisterUtils.doRegister(any(), any(), any()))
                 .thenAnswer((Answer<Void>) invocation -> null);
-        SpringCloudClientEventListener springCloudClientEventListener = buildSpringCloudClienttEventListener(false);
-        springCloudClientEventListener.onApplicationEvent(contextRefreshedEvent);
+        BrpcClientEventListener springMvcClientEventListener = buildBrpcClientEventListener();
+        springMvcClientEventListener.onApplicationEvent(contextRefreshedEvent);
         verify(applicationContext, times(1)).getBeansWithAnnotation(any());
         registerUtilsMockedStatic.close();
     }
-
-    private SpringCloudClientEventListener buildSpringCloudClienttEventListener(final boolean full) {
+    
+    private BrpcClientEventListener buildBrpcClientEventListener() {
         Properties properties = new Properties();
-        properties.setProperty("contextPath", "/test");
-        properties.setProperty("isFull", full + "");
-        properties.setProperty("ip", "127.0.0.1");
-        properties.setProperty("port", "8081");
+        properties.setProperty("contextPath", "/brpc");
+        properties.setProperty("ipAndPort", "127.0.0.1:21715");
+        properties.setProperty("host", "127.0.0.1");
+        properties.setProperty("port", "21715");
         properties.setProperty("username", "admin");
         properties.setProperty("password", "123456");
         PropertiesConfig config = new PropertiesConfig();
         config.setProps(properties);
         ShenyuRegisterCenterConfig mockRegisterCenter = new ShenyuRegisterCenterConfig();
-        mockRegisterCenter.setServerLists("http://127.0.0.1:8080");
+        mockRegisterCenter.setServerLists("http://127.0.0.1:9095");
         mockRegisterCenter.setRegisterType("http");
         mockRegisterCenter.setProps(properties);
-        // hit error
-        when(env.getProperty("spring.application.name")).thenReturn("");
-        Assert.assertThrows(ShenyuClientIllegalArgumentException.class, () -> new SpringCloudClientEventListener(config, ShenyuClientRegisterRepositoryFactory.newInstance(mockRegisterCenter), env));
-        when(env.getProperty("spring.application.name")).thenReturn("spring-cloud-test");
-        return new SpringCloudClientEventListener(config, ShenyuClientRegisterRepositoryFactory.newInstance(mockRegisterCenter), env);
+        return new BrpcClientEventListener(config, ShenyuClientRegisterRepositoryFactory.newInstance(mockRegisterCenter));
     }
-
-    @RestController
-    @RequestMapping("/order")
-    static class SpringCloudClientTestBean {
-        @PostMapping("/save")
-        @ShenyuSpringCloudClient(path = "/order/save")
-        public String save(@RequestBody final String body) {
-            return "" + body;
-        }
-
-        @PostMapping("/update")
-        @ShenyuSpringCloudClient(path = "")
-        public String update(@RequestBody final String body) {
-            return "" + body;
+    
+    @RpcExporter
+    static class BrpcClientTestBean {
+        
+        @ShenyuBrpcClient("/hello")
+        public String hello(final String input) {
+            return "hello:" + input;
         }
     }
+    
 }

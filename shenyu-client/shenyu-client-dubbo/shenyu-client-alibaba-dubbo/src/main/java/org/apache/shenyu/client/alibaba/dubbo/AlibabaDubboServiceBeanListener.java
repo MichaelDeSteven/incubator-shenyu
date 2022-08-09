@@ -50,7 +50,6 @@ import java.util.stream.Collectors;
 /**
  * The Alibaba Dubbo ServiceBean Listener.
  */
-//@SuppressWarnings("all")
 public class AlibabaDubboServiceBeanListener implements ApplicationListener<ContextRefreshedEvent> {
 
     /**
@@ -83,12 +82,13 @@ public class AlibabaDubboServiceBeanListener implements ApplicationListener<Cont
         publisher.start(shenyuClientRegisterRepository);
     }
     
+    @SuppressWarnings("all")
     @Override
     public void onApplicationEvent(@NonNull final ContextRefreshedEvent contextRefreshedEvent) {
         if (!registered.compareAndSet(false, true)) {
             return;
         }
-        // Fix bug(https://github.com/dromara/shenyu/issues/415), upload dubbo metadata on ContextRefreshedEvent
+        // Fix bug(https://github.com/apache/shenyu/issues/415), upload dubbo metadata on ContextRefreshedEvent
         Map<String, ServiceBean> serviceBean = contextRefreshedEvent.getApplicationContext().getBeansOfType(ServiceBean.class);
         for (Map.Entry<String, ServiceBean> entry : serviceBean.entrySet()) {
             handler(entry.getValue());
@@ -167,7 +167,7 @@ public class AlibabaDubboServiceBeanListener implements ApplicationListener<Cont
                 .build();
     }
     
-    private URIRegisterDTO buildURIRegisterDTO(@NonNull final ServiceBean serviceBean) {
+    private URIRegisterDTO buildURIRegisterDTO(@NonNull final ServiceBean<?> serviceBean) {
         return URIRegisterDTO.builder()
                 .contextPath(this.contextPath)
                 .appName(buildAppName(serviceBean))
@@ -191,7 +191,7 @@ public class AlibabaDubboServiceBeanListener implements ApplicationListener<Cont
         return GsonUtils.getInstance().toJson(builder);
     }
     
-    private String buildAppName(@NonNull final ServiceBean serviceBean) {
+    private String buildAppName(@NonNull final ServiceBean<?> serviceBean) {
         return StringUtils.isBlank(this.appName) ? serviceBean.getApplication().getName() : this.appName;
     }
     
@@ -199,7 +199,7 @@ public class AlibabaDubboServiceBeanListener implements ApplicationListener<Cont
         return IpUtils.isCompleteHost(this.host) ? this.host : IpUtils.getHost(this.host);
     }
     
-    private int buildPort(@NonNull final ServiceBean serviceBean) {
+    private int buildPort(@NonNull final ServiceBean<?> serviceBean) {
         return StringUtils.isBlank(this.port) ? serviceBean.getProtocol().getPort() : Integer.parseInt(this.port);
     }
 }

@@ -407,6 +407,12 @@
             </dependency>
 
             <dependency>
+                <groupId>com.baidu</groupId>
+                <artifactId>brpc-spring-boot-starter</artifactId>
+                <version>${brpc.version}</version>
+            </dependency>
+
+            <dependency>
                 <groupId>com.alibaba.nacos</groupId>
                 <artifactId>nacos-client</artifactId>
                 <version>${nacos-client.version}</version>
